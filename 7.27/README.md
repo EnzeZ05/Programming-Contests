@@ -17,3 +17,159 @@ https://www.luogu.com.cn/problem/P2292
 2. **不存在匹配：**
     $$mask <<= 1$$, 仅滑窗右移
     << 为左移，| 为按位或。窗口恒长 20，所以 mask 随时保持 20 bit。
+
+```
+#include <bits/stdc++.h>
+using namespace std;
+
+using ll  = long long;
+using ld  = long double;
+using i128 = __int128_t;
+
+const double  pi  = 3.14159265358979323846;
+const int mod = (int)1e9 + 7;
+const ll INF = 1e18;
+
+template <typename T>
+T chmax(T a, T b){
+    return a > b ? a : b;
+}
+
+template <typename T>
+T chmin(T a, T b){
+    return a > b ? b : a;
+}
+
+const int N = 1e5 + 1, M = 2 * N;
+
+struct AhoCorasick{
+    static constexpr int s = 26;
+    
+    struct P{
+        int len, k;
+        array<int, s> f;
+        P() : len{0}, k{0}, f{} {}
+    };
+    
+    vector<int> cnt;
+    vector<P> tr;
+
+    AhoCorasick(int n) : cnt(n){
+        init();
+    }
+    
+    void init(){
+        tr.assign(2, P());
+        tr[0].f.fill(1);
+        tr[0].len = -1;
+    }
+    
+    int new_p(){
+        tr.emplace_back();
+        return tr.size() - 1;
+    }
+    
+    int insert(const string &s){
+        int p = 1;
+        for(auto ch : s){
+            int idx = ch - 'a';
+            if(tr[p].f[idx] == 0){
+                tr[p].f[idx] = new_p();
+                tr[tr[p].f[idx]].len = tr[p].len + 1;
+            }
+            p = tr[p].f[idx];
+        }
+        cnt[p] |= 1 << (int)(s.size() - 1);
+        return p;
+    }
+    
+    void build(){
+        queue<int> q;
+        q.push(1);
+        
+        while(!q.empty()){
+            int cur = q.front();
+            q.pop();
+            
+            for(int i = 0; i < s; i++){
+                if(tr[cur].f[i] == 0){
+                    tr[cur].f[i] = tr[tr[cur].k].f[i];
+                } 
+                else{
+                    tr[tr[cur].f[i]].k = tr[tr[cur].k].f[i];
+                    cnt[tr[cur].f[i]] |= cnt[tr[tr[cur].k].f[i]];
+                    q.push(tr[cur].f[i]);
+                }
+            }
+        }
+    }
+    
+    int next(int p, int ch){ 
+        return tr[p].f[ch];
+    }
+    
+    int get_k(int p){ //找到p的fail指针
+        return tr[p].k;
+    }
+    
+    int get_len(int p){
+        return tr[p].len;
+    }
+    
+    int get_sz(){
+        return tr.size();
+    }
+};
+
+void solve(){   
+    int n, m;
+    cin >> n >> m;
+
+    AhoCorasick ac(N);
+    for(int i = 0; i < n; i++){
+        string s;
+        cin >> s;
+        ac.insert(s);
+    }
+
+    ac.build();
+
+    for(int i = 0; i < m; i++){
+        string s;
+        cin >> s;
+
+        s = "#" + s;
+        int mask = 1, ans = 0;
+
+        for(int j = 1, k = 1; j < s.size(); j++){
+            k = ac.next(k, s[j] - 'a');
+            if(mask & ac.cnt[k]){
+                mask = mask << 1 | 1;
+                ans = j;
+            }
+            else{
+                mask <<= 1;
+            }
+
+            if(!mask){
+                break;
+            }
+        }
+        cout << ans << endl;
+    }
+}
+
+int main(){
+    ios::sync_with_stdio(false);
+    cin.tie(nullptr);
+    cout.tie(nullptr);
+
+    int t = 1;
+    // cin >> t;
+
+    while(t--){
+        solve();
+    }
+    return 0;
+}
+```
