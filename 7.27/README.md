@@ -1,4 +1,4 @@
-P2292 [HNOI2004] L 语言
+## 题目1 P2292 [HNOI2004] L 语言 ##
 https://www.luogu.com.cn/problem/P2292
 
 ## 状压 bitset‑DP 思路（字典串长度 < 20）
