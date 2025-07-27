@@ -612,3 +612,199 @@ int main(){
   return 0;
 }
 ```
+
+### 题目4 [CQOI2014] 通配符匹配 ###
+https://www.luogu.com.cn/problem/P3167#submit
+
+这题和https://codeforces.com/problemset/problem/1975/G类似，但这题相对容易一点（另一个是FFT/NTT 优化的字符串匹配 + 减半查找）。
+因为通项符的个数小于等于10，分割了s以后最多会有20个子串，我们考虑dp, 设 $dp_{i,j}$ 为匹配在第j个位置匹配第i个字串的状态，记作 $0/1$. 
+如果为 *, 那么可以任意转移：只要前面的状态有1就行，用前缀和维护，同时注意开头可以是空串。
+如果为 ?，那么从 $dp_{i-1,j-1}$ 转移。
+如果是一个字串，那么转移时候要先满足它和查询串是匹配的，可用字符串哈希，最后从$dp_{i-1}{j - len}$转移。
+
+```
+#include <bits/stdc++.h>
+using namespace std;
+
+using ll  = long long;
+using ld  = long double;
+using i128 = __int128_t;
+
+const double  pi  = 3.14159265358979323846;
+const int mod = (int)1e9 + 7;
+const ll INF = 1e18;
+
+template <typename T>
+T chmax(T a, T b){
+    return a > b ? a : b;
+}
+
+template <typename T>
+T chmin(T a, T b){
+    return a > b ? b : a;
+}
+
+const int N = 1e5 + 1, M = 2 * N;
+
+using ull = unsigned long long;
+
+struct StringHash{
+    string s;
+    int n, p1, p2, b1, b2;
+    vector<ull> pw1, pw2, pre1, pre2;
+
+    void init(string _s, int _b1, int _b2, int _p1, int _p2) {
+        s = _s, p1 = _p1, p2 = _p2;
+        b1 = _b1, b2 = _b2;
+        n = s.size();
+        
+        pre1.resize(n + 1, 0);
+        pre2.resize(n + 1, 0);
+        pw1.resize(n + 1, 1);
+        pw2.resize(n + 1, 1);
+
+        for(int i = 1; i <= n; ++i){
+            pre1[i] = ((pre1[i - 1] * p1) + s[i - 1]) % b1;
+            pw1[i] = pw1[i - 1] * p1 % b1;
+        }
+
+        for(int i = 1; i <= n; ++i){
+            pre2[i] = ((pre2[i - 1] * p2) + s[i - 1]) % b2;
+            pw2[i] = pw2[i - 1] * p2 % b2;
+        }
+    }
+
+    ull query1(int l, int r) {
+        return (pre1[r] - (pre1[l - 1] * pw1[r - l + 1]) % b1 + b1) % b1;
+    }
+
+    ull query2(int l, int r) {
+        return (pre2[r] - (pre2[l - 1] * pw2[r - l + 1]) % b2 + b2) % b2;
+    }
+
+    int equals(StringHash st, int l, int r){
+        return query1(l, r) == st.query1(l, r) && query2(l, r) == st.query2(l, r);
+    }
+
+    int equals(StringHash st){
+        if(n != st.n){
+            return 0;
+        }
+        return query1(1, n) == st.query1(1, n) && query2(1, n) == st.query2(1, n);
+    }
+};
+
+/*
+    ha1.init(s, 1e9 + 7, 1e9 + 9, 131, 1211221);
+    ha2.init(s, 1e9 + 7, 1e9 + 9, 131, 1211221);
+    // s = '#' + s;
+*/
+
+ull hs1[22], hs2[22];
+string a[22];
+
+int dp[22][N], ndp[N], id;
+
+
+void solve(){   
+    string s;
+    cin >> s;
+
+    string t = "";
+    StringHash h;
+
+    for(int i = 0; i < s.size(); i++){
+        if(s[i] != '*' && s[i] != '?'){
+            t += s[i];
+        }
+        else{
+            if(t != ""){
+                a[++id] = t;
+                h.init(t, 1e9 + 7, 1e9 + 9, 131, 1211221);
+
+                hs1[id] = h.query1(1, t.size());
+                hs2[id] = h.query2(1, t.size());
+            }
+            t = "";
+            a[++id] = s[i];
+        }
+    }
+    if(t.size()){
+        a[++id] = t;
+        h.init(t, 1e9 + 7, 1e9 + 9, 131, 1211221);
+
+        hs1[id] = h.query1(1, t.size());
+        hs2[id] = h.query2(1, t.size());
+    }
+
+    int q;
+    cin >> q;
+    for(int i = 0; i < q; i++){
+        string s;
+        cin >> s;
+
+        int m = s.size();
+
+        StringHash h;
+        h.init(s, 1e9 + 7, 1e9 + 9, 131, 1211221);
+        s = '#' + s;
+
+        memset(dp, 0, sizeof dp);
+
+        dp[0][0] = 1;
+
+        for(int j = 1; j <= id; j++){
+            if(a[j] == "*"){
+                dp[j][0] |= dp[j - 1][0];
+            }
+
+            ndp[0] = dp[j - 1][0];
+            for(int k = 1; k <= m; k++){
+                ndp[k] = ndp[k - 1] | dp[j - 1][k];
+            }
+
+            for(int k = 1; k <= m; k++){
+                if(a[j] == "?"){
+                    dp[j][k] |= dp[j - 1][k - 1];
+                }
+                else if(a[j] == "*"){
+                    dp[j][k] |= ndp[k];
+                }
+                else{
+                    auto check = [&]() -> bool{
+                        if(k < a[j].size()){
+                            return 0;
+                        }
+                        if(h.query1(k - a[j].size() + 1, k) == hs1[j]){
+                            if(h.query2(k - a[j].size() + 1, k) == hs2[j]){
+                                return 1;
+                            }
+                        }
+                        return 0;
+                    };
+
+                    if(check()){
+                        dp[j][k] |= dp[j - 1][k - a[j].size()];
+                    }
+                }
+            }
+        }
+
+        cout << (dp[id][m] ? "YES" : "NO") << endl;
+    }
+}
+
+int main(){
+    ios::sync_with_stdio(false);
+    cin.tie(nullptr);
+    cout.tie(nullptr);
+
+    int t = 1;
+    // cin >> t;
+
+    while(t--){
+        solve();
+    }
+    return 0;
+}
+```
