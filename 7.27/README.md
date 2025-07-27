@@ -12,11 +12,9 @@ https://www.luogu.com.cn/problem/P2292
 
 1. **存在匹配：**  
    $$\bigl((\text{mask} \ll 1) \mid p_i \bigr) > 0$$  
-   则  
-   ```text
-   mask = (mask << 1) | 1   # 滑窗右移并把当前位标 1
+   则  mask = (mask << 1) | 1 # 滑窗右移并把当前位标 1
 
 2. **不存在匹配：**
 
-    mask <<= 1               # 仅滑窗右移
+    mask <<= 1  # 仅滑窗右移
     << 为左移，| 为按位或。窗口恒长 20，所以 mask 随时保持 20 bit。
