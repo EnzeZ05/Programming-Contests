@@ -1,7 +1,7 @@
 ## 题目1 Death DBMS ##
 https://codeforces.com/contest/1437/problem/G
 
-熟悉AC自动机的性质，一个串中的子串能通过fail指针得到，那么建出fail树时候可以发现查询串中fail指针所有祖先节点包含的完整串都是它的子串，那么对于每个fail指针可以做树链剖分到根查询。注意重复要用multiset维护相同名字所对应的值.
+熟悉AC自动机的性质，一个串中的子串能通过fail指针得到，那么建出fail树时候可以发现查询串中fail指针所有祖先节点包含的完整串都是它的子串，那么对于每个fail指针可以做树链剖分到根查询。注意重复要用multiset维护相同名字所对应的值。
 
 ```
 #include <bits/stdc++.h>
