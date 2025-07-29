@@ -373,3 +373,144 @@ int main(){
     return 0;
 }
 ```
+
+## 题目2 无尽的生命 ##
+https://www.luogu.com.cn/problem/P2448
+
+拆区间做逆序对。
+
+```
+#include <bits/stdc++.h>
+using namespace std;
+
+using ll   = long long;
+using ld   = long double;
+using i128 = __int128_t;
+
+const double pi  = 3.14159265358979323846;
+const int    mod = 1e9 + 7;
+const ll     INF = 1e18;
+
+template <typename T>
+T chmax(T a, T b){ return a > b ? a : b; }
+
+template <typename T>
+T chmin(T a, T b){ return a > b ? b : a; }
+
+const int N = 3e5 + 5;           
+
+template <typename T>
+struct Fenwick{
+    int n;
+    vector<T> a, b;
+    
+    Fenwick(int n = 0){
+        init(n);
+    }
+    
+    void init(int len){
+        n = len;
+        a.assign(n + 1, T{});
+        b.assign(n + 1, T{});
+    }
+
+    int lowbit(int i){
+        return i & -i;
+    }
+    
+    void add(ll x, const T &v) {
+        for(ll i = x; i <= n; i += lowbit(i)){
+            b[i] += x * v, a[i] += v;
+        }
+    }
+
+    T query(ll x) {
+        ll sum = 0;
+        for(ll i = x; i; i -= lowbit(i)){
+            sum += a[i];
+        }
+        return sum;
+    }
+    
+    T range_query(int l, int r) {
+        return query(r) - query(l);
+    }
+
+    int select(const T &k) {
+        int x = 0;
+        T cur{};
+        for(int i = 1 << __lg(n); i; i /= 2){
+            if(x + i <= n && cur + a[x + i - 1] <= k){
+                x += i;
+                cur = cur + a[x - 1];
+            }
+        }
+        return x;
+    }
+};
+
+int p[N << 1], ps[N << 1], len[N << 1];
+
+void solve(){
+    int n;  cin >> n;
+
+    vector<pair<int,int>> seg(n);
+    vector<int> vals;  vals.reserve(2 * n);
+
+    for(auto &p : seg){
+        cin >> p.first >> p.second;
+        vals.push_back(p.first);
+        vals.push_back(p.second);
+    }
+
+    sort(vals.begin(), vals.end());
+    vals.erase(unique(vals.begin(), vals.end()), vals.end());
+
+    int id = 0;
+    p[++id] = vals[0];
+    len[id] = 1;
+    ps[id] = id;
+
+    for(int i = 1; i < (int)vals.size(); ++i){
+        if(vals[i] - vals[i - 1] > 1){
+            p[++id] = vals[i - 1] + 1;
+            len[id] = vals[i] - vals[i - 1] - 1;
+            ps[id] = id;
+        }
+        p[++id] = vals[i];
+        len[id] = 1;
+        ps[id] = id;
+    }
+
+    auto locate = [&](int v){
+        return (int)(lower_bound(p + 1, p + 1 + id, v) - p);
+    };
+
+    for(auto &p : seg){
+        int x = locate(p.first);
+        int y = locate(p.second);
+        swap(len[x], len[y]);
+        swap(ps[x], ps[y]);
+    }
+
+    Fenwick<ll> fw(id);
+    ll ans = 0;
+
+    for(int i = id; i >= 1; --i){
+        ans += fw.query(ps[i] - 1) * 1ll * len[i];
+        fw.add(ps[i], len[i]);
+    }
+
+    cout << ans << '\n';
+}
+
+int main(){
+    ios::sync_with_stdio(false);
+    cin.tie(nullptr);
+
+    int T = 1;
+    // cin >> T;
+    while(T--) solve();
+    return 0;
+}
+```
