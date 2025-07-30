@@ -1,3 +1,4 @@
+链接 https://codeforces.com/contest/2128
 
 ## 题目1 A - Recycling Center ##
 
@@ -299,3 +300,103 @@ int main(){
 }
 ```
 
+## 题目5 E1 - Submedians (Easy Version) ##
+
+```
+#include <bits/stdc++.h>
+using namespace std;
+
+using ll  = long long;
+using ld  = long double;
+using i128 = __int128_t;
+
+const double  pi  = 3.14159265358979323846;
+const int mod = (int)1e9 + 7;
+const ll INF = 1e18;
+
+template <typename T>
+T chmax(T a, T b){
+    return a > b ? a : b;
+}
+
+template <typename T>
+T chmin(T a, T b){
+    return a > b ? b : a;
+}
+
+const int N = 3e5 + 1, M = 2 * N;
+ 
+void solve(){
+    int n, k;
+    cin >> n >> k;
+
+    vector<int> a(n + 1);
+    for(int i = 1; i <= n; i++){
+        cin >> a[i];
+    }
+
+    int l = 0, r = *max_element(a.begin() + 1, a.end()), L = 0, R = 0;
+
+    auto check = [&](int x) -> int{
+        int b[n + 1], p[n + 1];
+        for(int i = 0; i <= n; i++){
+            p[i] = (int)1e9;
+            b[i] = 0;
+        }
+        p[0] = 0;
+        
+        for(int i = 1; i <= n; i++){
+            b[i] = (a[i] >= x ? 1 : -1) + b[i - 1];
+            p[i] = chmin(p[i - 1], b[i]);
+        }
+
+        int max = -1;
+        for(int i = k; i <= n; i++){
+            if(b[i] - p[i - k] > max){
+                max = b[i] - p[i - k];
+                L = i - k, R = i;
+            }
+        }   
+
+        for(int i = 0; i <= R - k; i++){
+            if(b[R] - b[i] >= 0){
+                L = i + 1;
+                break;
+            }
+        }
+        return max >= 0;
+    };
+
+    int ans = 0, ansL = 0, ansR = 0;
+    while(l < r){
+        int mid = l + r >> 1;
+
+        if(!check(mid)){
+            r = mid;
+        }
+        else{
+            ans = mid, ansL = L, ansR = R;
+            l = mid + 1;
+        }
+    }
+    if(check(l)){
+        ans = l, ansL = L, ansR = R;
+    }
+    
+    cout << ans << " " << ansL << " " << ansR << endl;
+}
+    
+int main(){
+    ios::sync_with_stdio(false);
+    cin.tie(nullptr);
+    cout.tie(nullptr);
+
+    int t = 1;
+    cin >> t;
+
+    while(t--){
+        solve();
+    }
+    return 0;
+}
+```
