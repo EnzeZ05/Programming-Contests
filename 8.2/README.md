@@ -639,3 +639,163 @@ int main(){
     return 0;
 }
 ```
+
+https://leetcode.cn/contest/weekly-contest-461/
+
+## 三段式数组 I ##
+
+```
+class Solution {
+public:
+    bool isTrionic(vector<int>& nums) {
+        int n = (int)nums.size();
+        if(n < 3){
+            return false;
+        }
+
+        int i = 1, inc1 = 0, dec1 = 0, inc2 = 0;
+        while(i < n && nums[i] > nums[i - 1]){ 
+            ++inc1; ++i; 
+        }
+        if(inc1 == 0){
+            return false;    
+        }
+
+        while(i < n && nums[i] < nums[i - 1]){ 
+            ++dec1; ++i; 
+        }
+        if(dec1 == 0){
+            return false;   
+        }
+
+        while(i < n && nums[i] > nums[i - 1]){
+            ++inc2; ++i; 
+        }
+        if(inc2 == 0){
+            return false;  
+        }
+
+        return i == n;
+    }
+};
+```
+
+## 平衡装运的最大数量 ##
+
+```
+class Solution {
+public:
+    int maxBalancedShipments(vector<int>& weight) {
+        int n = weight.size(), cnt = 0, mx  = weight[0];  
+        
+        for(int i = 1; i < n; ++i){
+            mx = std::max(mx, weight[i]);
+            if (weight[i] < mx) {
+                ++cnt;         
+                if(i + 1 < n){     
+                    mx = weight[i + 1];
+                }
+                ++i;
+            }
+        }
+        return cnt;
+    }
+};
+```
+
+## 变为活跃状态的最小时间 ##
+
+```
+class Solution {
+public:
+    int minTime(string s, vector<int>& a, int k) {
+        int n = (int)s.size();
+        long long tot = 1LL * n * (n + 1) / 2;
+        if(k > tot){ 
+            return -1;
+        }
+
+        vector<int> time(n);
+        for(int t = 0; t < n; ++t){
+            time[a[t]] = t;
+        }
+
+        auto check = [&](int x) -> bool {
+            long long cnt = 0;     
+            long long run = 0;          
+            for (int i = 0; i < n; ++i) {
+                if(time[i] > x){
+                    ++run;
+                } 
+                else {
+                    cnt += run * (run + 1) / 2;
+                    run = 0;
+                    if(cnt > tot - k){
+                        return false;
+                    }
+                }
+            }
+            cnt += run * (run + 1) / 2;
+            return (tot - cnt) >= k;
+        };
+
+        int l = 0, r = n - 1, ans = -1;
+        while (l <= r) {
+            int mid = l + r >> 1;
+            if(check(mid)){
+                ans = mid;
+                r = mid - 1;
+            } 
+            else{
+                l = mid + 1;
+            }
+        }
+        return ans;
+    }
+};
+```
+
+## 三段式数组 II ##
+
+```
+class Solution {
+public:
+    long long maxSumTrionic(vector<int>& a) {
+        // dp[i][0/1/2/3]
+
+        int n = a.size();
+        long long INF = (long long)1e18;
+        vector<vector<long long>> dp(n, vector<long long>(4, -INF));
+
+        dp[0][0] = a[0];
+        for(int i = 1; i < n; i++){
+            dp[i][0] = a[i];
+            if(a[i] > a[i - 1]){
+                dp[i][1] = std::max(dp[i - 1][1] + a[i], dp[i - 1][0] + a[i]);
+            }
+            if(a[i] < a[i - 1]){
+                if(dp[i - 1][2] != -INF){
+                    dp[i][2] = dp[i - 1][2] + a[i];
+                }
+                if(i >= 2 && a[i - 1] > a[i - 2] && dp[i - 1][1] != -INF){
+                    dp[i][2] = std::max(dp[i][2], dp[i - 1][1] + a[i]);
+                }
+            }
+            if(a[i] > a[i - 1]){
+                if(dp[i - 1][3] != -INF){
+                    dp[i][3] = dp[i - 1][3] + a[i];
+                }
+                if(i >= 2 && a[i - 1] < a[i - 2] && dp[i - 1][2] != -INF){
+                    dp[i][3] = std::max(dp[i][3], dp[i - 1][2] + a[i]); 
+                }
+            }
+        }
+
+        long long mx = -INF;
+        for(int i = 0; i < n; i++){
+            mx = std::max(mx, dp[i][3]);
+        }
+        return mx;
+    }
+};
+```
