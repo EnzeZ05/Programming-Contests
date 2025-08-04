@@ -1,6 +1,6 @@
 https://qoj.ac/contest/1236
 
-## A Oops, It's Yesterday Twice More ##
+## A. Oops, It's Yesterday Twice More ##
 
 ```
 #include <bits/stdc++.h>
@@ -130,7 +130,7 @@ int main(){
 }
 ```
 
-## C Klee in Solitary Confinement ##
+## C. Klee in Solitary Confinement ##
 
 ```
 #include <bits/stdc++.h>
@@ -194,7 +194,7 @@ int main(){
 }
 ```
 
-## D Paimon Sorting ##
+## D. Paimon Sorting ##
 
 ```
 #include <bits/stdc++.h>
@@ -330,7 +330,7 @@ int main(){
 }
 ```
 
-## H Crystalfly ##
+## H. Crystalfly ##
 
 ```
 #include <bits/stdc++.h>
@@ -451,7 +451,7 @@ int main(){
 }
 ```
 
-## I Cloud Retainer's Game ## 
+## I. Cloud Retainer's Game ## 
 
 ```
 #include <bits/stdc++.h>
@@ -530,7 +530,7 @@ int main(){
 }
 ```
 
-## J Xingqiu's Joke ##
+## J. Xingqiu's Joke ##
 
 ```
 #include <bits/stdc++.h>
@@ -628,7 +628,7 @@ int main(){
 }
 ```
 
-## M Windblume Festival ##
+## M. Windblume Festival ##
 
 ```
 #include <bits/stdc++.h>
