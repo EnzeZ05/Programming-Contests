@@ -1,7 +1,7 @@
 ## 3630. 划分数组得到最大异或运算和与运算之和 ##
 https://leetcode.cn/problems/partition-array-for-maximum-xor-and-and/description/
 
-$a+b=(a\oplus b)+2*(a\land b)$
+$a+b=(a\oplus b)+2*(a\mathbin{\&}\,b)$
 
 ```
 #include <bits/stdc++.h>
