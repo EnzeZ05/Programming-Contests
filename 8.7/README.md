@@ -1,8 +1,6 @@
 ## 3630. 划分数组得到最大异或运算和与运算之和 ##
 https://leetcode.cn/problems/partition-array-for-maximum-xor-and-and/description/
 
-$a+b=(a\oplus b)+2\cdot(a\text{\&}b)$
-
 ```
 #include <bits/stdc++.h>
 using namespace std;
