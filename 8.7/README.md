@@ -375,3 +375,133 @@ int main(){
     return 0;
 }
 ```
+
+## D. Unusual Sequences ##
+https://codeforces.com/problemset/problem/900/D
+
+```
+#include <bits/stdc++.h>
+using namespace std;
+
+using ll  = long long;
+using ld  = long double;
+using i128 = __int128_t;
+
+const double  pi  = 3.14159265358979323846;
+const int mod = (int)1e9 + 7;
+const ll INF = 1e18;
+
+template <typename T>
+T chmax(T a, T b){
+    return a > b ? a : b;
+} 
+
+template <typename T>
+T chmin(T a, T b){
+    return a > b ? b : a;
+}
+
+const int N = 1e5 + 10, M = 2 * N;
+
+ll qpow(ll a, ll b, ll m){
+    ll res = 1;  
+    a = a % m;  
+    
+    while(b > 0){
+        if(b % 2 == 1){
+            res = (res * a) % m; 
+        }
+        a = (a * a) % m; 
+        b /= 2;  
+    }
+    
+    return res;
+}
+
+vector<int> pr;
+
+void sieve(int LIM = 31623){
+    vector<bool> is(LIM + 1, true);
+    is[0] = is[1] = false;
+    for(int i = 2; 1LL * i * i <= LIM; ++i){
+        if(is[i]){
+            for(int j = i * i; j <= LIM; j += i){ 
+                is[j] = false;
+            }
+        }
+    }
+    for(int i = 2; i <= LIM; ++i){
+        if(is[i]){
+            pr.push_back(i);
+        }
+    }
+}
+
+int mu(ll n) {
+    if(n == 1){
+        return 1;
+    }
+
+    int cnt = 0;
+    for(int p : pr){
+        if(1ll * p * p > n){
+            break;
+        }
+        if(n % p == 0){
+            n /= p;
+            if(n % p == 0){ 
+                return 0; 
+            }
+
+            ++cnt;                    
+            while(n % p == 0){ 
+                n /= p;
+            }
+        }
+    }
+    
+    if(n > 1){ 
+        ++cnt;
+    }              
+    return (cnt & 1) ? -1 + mod : 1;
+}
+
+
+void solve(){   
+    ll x, y;
+    cin >> x >> y;
+
+    if(y % x != 0){
+        cout << 0 << "\n";
+    }
+    else{
+        y = y / x;
+        ll ans = 0;
+        sieve();
+
+        for(ll i = 1; i * i <= y; i++){
+            if(y % i == 0){
+                ans = (ans + mu(y / i) * 1ll * qpow(2, i - 1, mod) % mod) % mod;
+                if(y / i != i){
+                    ans = (ans + mu(y / (y / i)) * 1ll * qpow(2, y / i - 1, mod) % mod) % mod;
+                }
+            }
+        }
+        cout << ans << "\n";
+    }
+}   
+    
+int main(){
+    // ios::sync_with_stdio(false);
+    // cin.tie(nullptr);
+    // cout.tie(nullptr);
+
+    int t = 1;
+    // cin >> t;
+
+    while(t--){
+        solve();
+    }
+    return 0;
+}
+```
