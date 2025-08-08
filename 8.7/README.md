@@ -296,3 +296,82 @@ int main(){
     return 0;
 }
 ```
+
+## E. Array Queries ##
+https://codeforces.com/problemset/problem/797/E
+
+```
+#include <bits/stdc++.h>
+using namespace std;
+
+using ll  = long long;
+using ld  = long double;
+using i128 = __int128_t;
+
+const double  pi  = 3.14159265358979323846;
+const int mod = 998244353;
+const ll INF = 1e18;
+
+template <typename T>
+T chmax(T a, T b){
+    return a > b ? a : b;
+} 
+
+template <typename T>
+T chmin(T a, T b){
+    return a > b ? b : a;
+}
+
+const int N = 1e5 + 10, M = 2 * N;
+int a[N], dp[N][360];
+
+void solve(){   
+    int n;
+    cin >> n;
+
+    int m = sqrt(n);
+    for(int i = 1; i <= n; i++){
+        cin >> a[i];
+    }
+
+    for(int i = n; i >= 1; i--){
+        for(int j = 1; j <= m; j++){
+            dp[i][j] = dp[chmin(n + 1, i + a[i] + j)][j] + 1;
+        }
+    }
+
+    int q;
+    cin >> q;
+
+    for(int i = 1; i <= q; i++){
+        int p, k;
+        cin >> p >> k;
+
+        if(k <= m){
+            cout << dp[p][k] << "\n";
+        }
+        else{
+            int op = 0;
+            while(p <= n){
+                p = p + a[p] + k;
+                op++;
+            }
+            cout << op << "\n";
+        }
+    }
+}   
+    
+int main(){
+    // ios::sync_with_stdio(false);
+    // cin.tie(nullptr);
+    // cout.tie(nullptr);
+
+    int t = 1;
+    // cin >> t;
+
+    while(t--){
+        solve();
+    }
+    return 0;
+}
+```
