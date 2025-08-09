@@ -26,6 +26,133 @@ T chmin(T a, T b){
 
 const int N = 3e5 + 10, M = 2 * N;
 
+int fa[N][21], dfn[N], seq[N], sz[N], dep[N], cnt;
+int a[N], s[N], top, n;
+
+vector<int> adj1[N], adj2[N];
+
+void add(int u, int v){
+    adj1[u].push_back(v);
+    adj1[v].push_back(u);
+}
+
+void dfs(int u, int p){
+    fa[u][0] = p;
+    dep[u] = dep[p] + 1;
+    dfn[u] = ++cnt;
+    sz[u] = 1;
+
+    for(int j = 1; j <= 20; j++){
+        fa[u][j] = fa[fa[u][j - 1]][j - 1];
+    }
+
+    for(auto& v : adj1[u]){
+        if(v == p){ 
+            continue;
+        }
+        dfs(v, u);
+        sz[u] += sz[v];
+    }
+
+    seq[u] = cnt;
+    sort(adj1[u].begin(), adj1[u].end(), [&](int x,int y){ 
+        return dfn[x] < dfn[y]; 
+    });
+}
+
+int lca(int u, int v){
+    if(dep[u] < dep[v]){
+        swap(u, v);
+    }
+
+    for(int i = 20; i >= 0; i--){
+        if(dep[fa[u][i]] >= dep[v]){
+            u = fa[u][i];
+        }
+    }
+    if(u == v) return u;
+
+    for(int i = 20; i >= 0; i--){
+        if (fa[u][i] != fa[v][i]){
+            u = fa[u][i];
+            v = fa[v][i];
+        }
+    }
+    return fa[u][0];
+}
+
+bool is_anc(int u, int v){
+    return dfn[u] <= dfn[v] && dfn[v] < seq[u];
+}
+
+int rooted_fa(int u, int v) {
+    swap(u, v);
+    if(u == v){
+        return u;
+    }
+    if(!is_anc(u, v)){
+        return fa[u][0];
+    }
+    auto it = upper_bound(adj1[u].begin(), adj1[u].end(), v, [&](int x, int y) {
+        return dfn[x] < dfn[y];
+    }) - 1;
+    return *it;
+}
+
+int rooted_sz(int u, int v) {
+    if(u == v) {
+        return n;
+    }
+    if(!is_anc(v, u)) {
+        return sz[v];
+    }
+    return n - sz[rooted_fa(u, v)];
+}
+
+int rooted_lca(int a, int b, int c) {
+    return lca(a, b) ^ lca(b, c) ^ lca(c, a);
+}
+
+int jump(int u, int k){
+    for(int i = 20; i >= 0; i--){
+        if(dep[fa[u][i]] >= k){
+            u = fa[u][i];
+        }
+    }
+    return u;
+}
+
+int cmp(int& a, int& b){
+    return dfn[a] < dfn[b];
+}
+
+void build(int k){
+    sort(a, a + k, cmp);
+    top = 0;
+    s[++top] = a[0];
+
+    for(int i = 1; i < k; i++){
+        int anc = rooted_lca(a[0], s[top], a[i]);
+        while(top > 1 && dep[s[top - 1]] >= dep[anc]){
+            adj2[s[top - 1]].push_back(s[top]);
+            top--;
+        }
+
+        if(anc != s[top]){
+            adj2[anc].push_back(s[top]);
+            s[top] = anc;
+        }
+        s[++top] = a[i];
+    }
+
+    while(top > 1){
+        adj2[s[top - 1]].push_back(s[top]);
+        top--;
+    }
+}
+
+int b[N], dp[N], tag[N];
+
 void solve(){   
     cin >> n;
     cnt = 0;
