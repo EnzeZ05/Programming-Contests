@@ -927,3 +927,229 @@ int main(){
     return 0;
 }
 ```
+
+## [SDOI2011] 消耗战 ##
+https://www.luogu.com.cn/problem/P2495
+
+```
+#include <bits/stdc++.h>
+using namespace std;
+
+using ll  = long long;
+using ld  = long double;
+using i128 = __int128_t;
+
+const double  pi  = 3.14159265358979323846;
+const int mod = (int)1e9 + 7;
+const ll INF = 1e18;
+
+template <typename T>
+T chmax(T a, T b){
+    return a > b ? a : b;
+} 
+
+template <typename T>
+T chmin(T a, T b){
+    return a > b ? b : a;
+}
+
+const int N = 3e5 + 10, M = 2 * N;
+
+int h[N], e[M], ne[M], w[M], idx;    
+int dep[N], sz[N], dfn[N], cnt;
+int fa[N][21], dp[N][21];
+int s[N], a[N], k, top;
+
+vector<int> adj[N];
+
+void add(int u, int v, int c){
+    e[idx] = v, w[idx] = c, ne[idx] = h[u], h[u] = idx++;
+}
+
+void dfs(int u, int pa){
+    dep[u] = dep[pa] + 1;
+    dfn[u] = ++cnt;
+    fa[u][0] = pa;
+    sz[u] = 1;
+
+    for(int i = 0; i < 20; i++){
+        fa[u][i + 1] = fa[fa[u][i]][i];
+        dp[u][i + 1] = chmin(dp[u][i], dp[fa[u][i]][i]);
+    }
+
+    for(int i = h[u]; i != -1; i = ne[i]){
+        int v = e[i];
+        if(v == pa){
+            continue;
+        }
+
+        dp[v][0] = w[i];
+        dfs(v, u);
+    }
+}
+
+int lca(int u, int v){
+    if(dep[u] < dep[v]){
+        swap(u, v);
+    }
+ 
+    for(int i = 20; i >= 0; i--){
+        if(dep[fa[u][i]] >= dep[v]){
+            u = fa[u][i];
+        }
+    }
+    if(u == v) return u;
+ 
+    for(int i = 20; i >= 0; i--){
+        if (fa[u][i] != fa[v][i]){
+            u = fa[u][i];
+            v = fa[v][i];
+        }
+    }
+    return fa[u][0];
+}
+
+int cmp(int& a, int& b){
+    return dfn[a] < dfn[b];
+}
+
+vector<int> vt;
+
+void build(){
+    sort(a, a + k, cmp);
+    top = 0;
+
+    s[++top] = 1;
+    vt.push_back(1);
+
+    if(a[0] != 1){
+        s[++top] = a[0];
+        vt.push_back(a[0]);
+    }
+
+    for(int i = 1; i < k; i++){
+        int anc = lca(a[i], s[top]);
+        while(top > 1 && dep[s[top - 1]] >= dep[anc]){
+            if(s[top - 1] != s[top]){
+                adj[s[top - 1]].push_back(s[top]);
+            }
+            top--;
+        }
+
+        if(anc != s[top]){
+            adj[anc].push_back(s[top]);
+            s[top] = anc;   
+            vt.push_back(anc);
+        }
+
+        s[++top] = a[i];
+        vt.push_back(a[i]);
+    }
+
+    while(top > 1){
+        if(s[top - 1] != s[top]){
+            adj[s[top - 1]].push_back(s[top]);
+        }
+        top--;
+    }
+}
+
+ll ddp[N], tag[N];
+
+void solve(){
+    int n;
+    cin >> n;
+
+    for(int i = 0; i <= n; i++){
+        h[i] = -1;
+
+        for(int j = 0; j <= 20; j++){
+            dp[i][j] = (int)1e9;
+        }
+        dep[i] = (int)1e9;
+    }
+    idx = 0;
+
+    for(int i = 1; i < n; i++){
+        int u, v, w;
+        cin >> u >> v >> w;
+        add(u, v, w), add(v, u, w);
+    }
+
+    dep[0] = 0;
+    dfs(1, 0);
+
+    int q;
+    cin >> q;
+
+    for(int i = 0; i < q; i++){
+        cin >> k;
+        for(int j = 0; j < k; j++){
+            cin >> a[j];
+            ddp[a[j]] = 0;
+            tag[a[j]] = 1;
+        }
+        ddp[1] = 0;
+
+        build();
+        queue<int> q;
+        q.push(s[1]);
+
+        auto calc = [&](int u, int k) -> ll{
+            int min = dp[u][0];
+            for(int i = 20; i >= 0; i--){
+                if(k >= (1 << i)){
+                    min = chmin(min, dp[u][i]);
+                    u = fa[u][i];
+                    k -= (1 << i);
+                }
+            }
+            return min;
+        };
+
+        auto dfs = [&](auto& self, int u) -> void{
+            int leaf = 1;
+            for(auto& v : adj[u]){
+                self(self, v);
+                    
+                if(tag[v]){
+                    ddp[u] += calc(v, dep[v] - dep[u]);
+                }
+                else{
+                    ddp[u] += chmin(calc(v, dep[v] - dep[u]), ddp[v]);
+                }
+                leaf = 0;
+            }
+        };
+
+        dfs(dfs, s[1]);
+        cout << ddp[s[1]] << "\n";
+
+        sort(vt.begin(), vt.end());
+        vt.erase(unique(vt.begin(), vt.end()), vt.end());
+        for(int& u : vt){
+            adj[u].clear();
+            ddp[u] = 0;
+        }
+        vt.clear();
+
+        for(int j = 0; j < k; j++){
+            tag[a[j]] = 0;
+        }
+    }
+}   
+    
+int main(){
+    ios::sync_with_stdio(false);
+    cin.tie(nullptr);
+    cout.tie(nullptr);
+
+    int t = 1;
+    // cin >> t;
+
+    while(t--){
+        solve();
+    }
+    return 0;
+}
+```
