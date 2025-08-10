@@ -530,3 +530,400 @@ int main(){
     return 0;
 }
 ```
+## G. Fibonacci  ##
+https://qoj.ac/contest/1477/problem/8025
+
+```
+#include <bits/stdc++.h>
+using namespace std;
+
+using ll  = long long;
+using ld  = long double;
+using i128 = __int128_t;
+
+const double  pi  = 3.14159265358979323846;
+const int mod = (int)1e9 + 7;
+const ll INF = 1e18;
+
+template <typename T>
+T chmax(T a, T b){
+    return a > b ? a : b;
+} 
+
+template <typename T>
+T chmin(T a, T b){
+    return a > b ? b : a;
+}
+
+const int N = 2e5 + 10, M = 2 * N;
+
+void solve(){
+    ll n;
+    cin >> n;
+
+    ll m = n / 3;
+    ll l = m * n - 3 * m * (m + 1) / 2;
+    ll r = m * (m + 1);
+
+    cout << l + r << "\n";
+}   
+    
+int main(){
+    ios::sync_with_stdio(false);
+    cin.tie(nullptr);
+    cout.tie(nullptr);
+
+    int t = 1;
+    // cin >> t;
+
+    while(t--){
+        solve();
+    }
+    return 0;
+}
+```
+
+## M. Gitignore  ##
+https://qoj.ac/contest/1477/problem/8031
+
+```
+#include <bits/stdc++.h>
+using namespace std;
+
+using ll  = long long;
+using ld  = long double;
+using i128 = __int128_t;
+
+const double  pi  = 3.14159265358979323846;
+const int mod = (int)1e9 + 7;
+const ll INF = 1e18;
+
+template <typename T>
+T chmax(T a, T b){
+    return a > b ? a : b;
+} 
+
+template <typename T>
+T chmin(T a, T b){
+    return a > b ? b : a;
+}
+
+const int N = 2e5 + 10, M = 2 * N;
+vector<int> adj[N];
+
+unordered_map<string, int> mp1;
+unordered_map<int, int> fa, mp2;
+
+void solve(){
+    int n, m;
+    cin >> n >> m;
+
+    mp1.clear();
+    mp2.clear();
+    fa.clear();
+
+    int id = 1; 
+
+    for(int i = 0; i < n; i++){
+        string s; cin >> s; s += '/';
+        string t = "";
+        int pre = -1;
+
+        for(int j = 0; j < (int)s.size(); j++){
+            t += s[j];                 
+            if(s[j] == '/'){
+                if(!mp1.count(t)){
+                    mp1[t] = id++;
+                }
+                int cur = mp1[t];
+                if(pre != -1){
+                    if(!fa.count(cur)){
+                        adj[pre].push_back(cur);
+                        fa[cur] = pre;
+                    }
+                }
+                pre = cur;
+            }
+        }
+    }
+
+    for(int i = 0; i < m; i++){
+        string s; cin >> s; s += '/';
+        string t = "";
+        int pre = -1;
+
+        for(int j = 0; j < (int)s.size(); j++){
+            t += s[j];
+            if(s[j] == '/'){
+                if(!mp1.count(t)){
+                    mp1[t] = id++;
+                }
+                int cur = mp1[t];
+                if(pre != -1){
+                    if(!fa.count(cur)){
+                        adj[pre].push_back(cur);
+                        fa[cur] = pre;
+                    }
+                }
+                pre = cur;
+            }
+        }
+
+        if(pre != -1){
+            mp2[pre] = 1;
+        }
+    }
+
+
+    for(int i = 1; i < id; i++){
+        if(mp2[i]){
+            int u = i;
+            while (fa[u] && mp2[fa[u]] != 1){
+                mp2[fa[u]] = 1;
+                u = fa[u];
+            }
+        }
+    }
+
+    int ans = 0;
+    for(int i = 1; i < id; i++){
+        if(!fa[i]){
+            auto dfs = [&](auto& self, int u) -> void{
+                if(mp2[u] == 0){ 
+                    ans++; 
+                    return; 
+                }
+                for(int v : adj[u]){
+                    self(self, v);
+                }
+            };
+            dfs(dfs, i);
+        }
+    }
+    cout << ans << "\n";
+
+    for(auto& [k, v] : mp1){
+        adj[v].clear();
+    }
+}   
+    
+int main(){
+    ios::sync_with_stdio(false);
+    cin.tie(nullptr);
+    cout.tie(nullptr);
+
+    int t = 1;
+    cin >> t;
+
+    while(t--){
+        solve();
+    }
+    return 0;
+}
+```
+
+## B. Mine Sweeper II ##
+https://qoj.ac/contest/1477/problem/8020
+
+```
+#include <bits/stdc++.h>
+using namespace std;
+
+using ll  = long long;
+using ld  = long double;
+using i128 = __int128_t;
+
+const double  pi  = 3.14159265358979323846;
+const int mod = (int)1e9 + 7;
+const ll INF = 1e18;
+
+template <typename T>
+T chmax(T a, T b){
+    return a > b ? a : b;
+} 
+
+template <typename T>
+T chmin(T a, T b){
+    return a > b ? b : a;
+}
+
+const int N = 2e5 + 10, M = 2 * N;
+
+int dir_x[4] = {1, -1, 0, 0}, dir_y[4] = {-1, 1, 0, 0};
+ 
+void solve(){
+    int n, m;
+    cin >> n >> m;
+
+    vector<string> a, b;
+    for(int i = 0; i < n; i++){
+        string s;
+        cin >> s;
+        a.push_back(s);
+    }
+
+    for(int i = 0; i < n; i++){
+        string s;
+        cin >> s;
+        b.push_back(s);
+    }
+
+    int ans = 0;
+    for(int i = 0; i < n; i++){
+        for(int j = 0; j < m; j++){
+            ans += a[i][j] == b[i][j];
+        }
+    }
+
+    if(ans <= n * m / 2){
+        for(int i = 0; i < n; i++){
+            for(int j = 0; j < m; j++){
+                cout << (a[i][j] == '.' ? 'X' : '.'); 
+            }
+            cout << "\n";
+        }
+    }
+    else{
+        for(int i = 0; i < n; i++){
+            cout << a[i] << "\n";
+        }
+    }
+}   
+    
+int main(){
+    ios::sync_with_stdio(false);
+    cin.tie(nullptr);
+    cout.tie(nullptr);
+
+    int t = 1;
+    // cin >> t;
+
+    while(t--){
+        solve();
+    }
+    return 0;
+}
+```
+
+## D. Walker  ##
+```
+#include <bits/stdc++.h>
+using namespace std;
+
+using ll  = long long;
+using ld  = long double;
+using i128 = __int128_t;
+
+const double  pi  = 3.14159265358979323846;
+const int mod = (int)1e9 + 7;
+const ll INF = 1e18;
+
+template <typename T>
+T chmax(T a, T b){
+    return a > b ? a : b;
+} 
+
+template <typename T>
+T chmin(T a, T b){
+    return a > b ? b : a;
+}
+
+const int N = 2e5 + 10, M = 2 * N;
+ 
+void solve(){
+    ld n, p1, v1, p2, v2;
+    cin >> n >> p1 >> v1 >> p2 >> v2;
+
+    if(p1 > p2){
+        swap(p1, p2);
+        swap(v1, v2);
+    }
+
+    auto case1 = [&](ld x) -> int{
+        ld R = 0.0L;
+        ld vt1 = v1 * x;
+        if(vt1 >= p1){
+            R = max((vt1 + p1) / 2.0L, vt1 - p1);
+            R = max((ld)0, min(R, n));        
+        }
+
+        ld L = 0.0L;
+        ld vt2 = v2 * x;
+        ld q = n - p2;
+        if(vt2 >= q){
+            L = chmax((vt2 + q) / 2.0L, vt2 - q);
+            L = chmax((ld)0, chmin(L, n));
+        }
+
+        return R + L + 1e-18L >= n;
+    };
+
+    auto case2 = [&](ld x) -> int{
+        ld t = (p2 - p1) / (v2 + v1);
+        if(p1 == 0 && p2 == n){
+            return t <= x;
+        }
+        else{
+            x -= t;
+            if(x < 0){
+                return 0;
+            }
+            if(x * v1 - t * v1 - p1 >= n){
+                return 1;
+            }
+            if(x * v2 - t * v2 - (n - p2) >= n){
+                return 1;
+            }
+            if(chmax((p1 + t * v1) / v1, (n - p2 + t * v2) / v2) <= x){
+                return 1;
+            }
+            return 0;
+        }
+    };
+
+    auto case3 = [&](ld x) -> int{
+        if(p1 == 0 && n / v1 <= x){
+            return 1;
+        }
+        if(p2 == n && n / v2 <= x){
+            return 1;
+        }
+        if(chmax(p2 / v2, (n - p1) / v1) <= x){
+            return 1;
+        }
+        if(v1 * x >= n + chmin(p1, n - p1) || v2 * x >= n + chmin(p2, n - p2)){
+            return 1;
+        }
+        return 0;
+    };
+
+    auto check = [&](ld x) -> int{
+        return case1(x) || case2(x) || case3(x);
+    };
+
+    ld l = 0, r = 1e12, base = 1.0, eps = 1e-12;
+    while(r - l > chmax(base, l) * eps){
+        ld x = (l + r) / 2;
+        if(check(x)){
+            r = x;
+        }
+        else l = x;
+    }
+
+    cout << setprecision(20) << r << "\n";
+}   
+    
+int main(){
+    ios::sync_with_stdio(false);
+    cin.tie(nullptr);
+    cout.tie(nullptr);
+
+    int t = 1;
+    cin >> t;
+
+    while(t--){
+        solve();
+    }
+    return 0;
+}
+```
