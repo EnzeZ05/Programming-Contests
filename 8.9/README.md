@@ -1108,7 +1108,6 @@ void solve(){
         };
 
         auto dfs = [&](auto& self, int u) -> void{
-            int leaf = 1;
             for(auto& v : adj[u]){
                 self(self, v);
                     
@@ -1118,7 +1117,6 @@ void solve(){
                 else{
                     ddp[u] += chmin(calc(v, dep[v] - dep[u]), ddp[v]);
                 }
-                leaf = 0;
             }
         };
 
