@@ -33,78 +33,86 @@ void solve(){
             int n, m;
             cin >> n >> m;
 
-            int a[n][n], one = 0;
+            int a[n][n];
             for(int i = 0; i < n; i++){
+                string s;
+                cin >> s;
                 for(int j = 0; j < n; j++){
-                    cin >> a[i][j];
-                    one += a[i][j];
+                    a[i][j] = s[j] - '0';
                 }
             }
 
             vector<vector<int>> b, c;
-            int b1 = 0, b2 = 0, c1 = 0, c2 = 0;
 
             for(int i = 0; i < n; i++){
                 int cnt = 0;
-                for(int j = 0; j < m; j++){
+                for(int j = 0; j < n; j++){
                     cnt += a[i][j];
                 }
-                b.push_back({cnt, i});
-                
-                if(cnt & 1){
-                    b1 = 1;
-                }
-                else{
-                    b2 = 1;
-                }
+                b.push_back({cnt, i + 1});
             }
 
-            for(int i = 0; i < m; i++){
+            for(int i = 0; i < n; i++){
                 int cnt = 0;
                 for(int j = 0; j < n; j++){
                     cnt += a[j][i];
                 }
-                c.push_back({cnt, i});
-                
-                if(cnt & 1){
-                    c1 = 1;
-                }
-                else{
-                    c2 = 1;
+                c.push_back({cnt, i + 1});
+            }
+
+            sort(b.begin(), b.end());
+            sort(c.begin(), c.end());
+
+            const int N = 1001;
+            vector<bitset<N>> B(n), C(n);
+
+            for(int i = 0; i < n; i++){
+                for(int j = 0; j < n; j++){
+                    B[i] |= a[i][j] << j; 
                 }
             }
 
-            auto print = [&](const vector<vector<int>>& a, int par) -> void{
-                 for(int i = 0; i < a.size(); i++){
-                    if(a[i][0] % 2 == par){
-                        cout << a[i][1] + 1 << " ";
-                        break;
-                    }
+            for(int i = 0; i < n; i++){
+                for(int j = 0; j < n; j++){
+                    C[i] |= a[j][i] << j; 
                 }
-            };
- 
-            if(m){
-                assert((b1 && c1) || (b2 && c2));
-                if(b1 && c1){
-                    print(b, 1);
-                    print(c, 1);
+            }
+
+            if(!m){
+                assert(c.back()[0] >= b[0][0]);
+                if(c.back()[0] > b[0][0]){
+                    cout << b[0][1] << " " << c.back()[1] << "\n";
                 }
                 else{
-                    print(b, 0);
-                    print(c, 0);
+                    for(int i = 0; i < n; i++){
+                        for(int j = 0; j < n; j++){
+                            if((B[i] ^ C[j]).count() == 0){
+                                cout << i + 1 << " " << j + 1 << "\n";
+                                goto entry;
+                            }
+                        }
+                    }     
+                    assert(false);
                 }
             }
             else{
-                assert((b1 && c2) || (b2 && c1));
-                if(b1 && c2){
-                    print(b, 1);
-                    print(c, 0);
+                assert(b.back()[0] >= c[0][0]);
+                if(b.back()[0] > c[0][0] || (b.back()[0] == n && c[0][0] == n)){
+                    cout << b.back()[1] << " " << c[0][1] << "\n";
                 }
                 else{
-                    print(b, 0);
-                    print(c, 1);
+                    for(int i = 0; i < n; i++){
+                        for(int j = 0; j < n; j++){
+                            if((B[i] ^ C[j]).count()){
+                                cout << i + 1 << " " << j + 1 << "\n";
+                                goto entry;
+                            }
+                        }
+                    }
+                    assert(false);
                 }
             }
+            entry:;
         }
     }
     else{
@@ -115,14 +123,38 @@ void solve(){
             int n;
             cin >> n;
 
-            int cnt = 0;
-            for(int i = 0; i < 2 * n; i++){
-                int x;
-                cin >> x;
-                cnt += x;
+            int r = 0, c = 0;
+            const int N = 1001;
+            bitset<N> a, b;
+
+            for(int i = 0; i < 2; i++){
+                string s;
+                cin >> s;
+                if(i == 0){
+                    r = count(s.begin(), s.end(), '1');
+                    for(int j = 0; j < n; j++){
+                        a |= (s[j] - '0') << j;
+                    }
+                }
+                else{
+                    c = count(s.begin(), s.end(), '1');
+                    for(int j = 0; j < n; j++){
+                        b |= (s[j] - '0') << j;
+                    }
+                }
             }
 
-            cout << !(cnt & 1) << "\n";
+            if(r == c){
+                if(r == n && c == n){
+                    cout << 1 << "\n";
+                }
+                else{
+                    cout << ((a ^ b).count() > 0) << "\n";
+                }
+            }
+            else{
+                cout << (r > c) << "\n";
+            }
         }
     }
 } 
@@ -133,7 +165,7 @@ int main(){
     cout.tie(nullptr);
 
     int t = 1;
-    cin >> t;
+    // cin >> t;
 
     while(t--){
         solve();
